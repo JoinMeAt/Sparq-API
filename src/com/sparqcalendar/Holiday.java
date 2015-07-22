@@ -2,14 +2,12 @@ package com.sparqcalendar;
 
 public class Holiday {
 	String name;
-	String startDate;
-	String stopDate;
+	String date;
 	public Holiday() {}
-	public Holiday(String name, String startDate, String stopDate) {
+	public Holiday(String name, String date) {
 		super();
 		this.name = name;
-		this.startDate = startDate;
-		this.stopDate = stopDate;
+		this.date = date;
 	}
 	public String getName() {
 		return name;
@@ -17,16 +15,10 @@ public class Holiday {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getStartDate() {
-		return startDate;
+	public String getDate() {
+		return date;
 	}
-	public void setStartDate(String startDate) {
-		this.startDate = startDate;
-	}
-	public String getSTopDate() {
-		return stopDate;
-	}
-	public void setStopDate(String StopDate) {
-		this.stopDate = StopDate;
+	public void setDate(String date) {
+		this.date = date;
 	}
 }

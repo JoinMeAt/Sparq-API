@@ -1,22 +1,14 @@
 package com.sparqcalendar;
 
 public class RotationalDay {
-	long id;
+	int number;
 	String name;
 	
 	public RotationalDay() {}
 	
-	public RotationalDay(long id, String name) {
-		this.id = id;
+	public RotationalDay(int number, String name) {
+		this.number = number;
 		this.name = name;
-	}
-
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
 	}
 
 	public String getName() {
@@ -25,6 +17,14 @@ public class RotationalDay {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public int getNumber() {
+		return number;
+	}
+
+	public void setNumber(int number) {
+		this.number = number;
 	}
 	
 	

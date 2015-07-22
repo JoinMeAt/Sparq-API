@@ -6,27 +6,29 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.apache.http.util.TextUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+import com.sparqcalendar.util.Constants;
 
 public class Schedule {
 	long userID;
 	int type;
 	int grade;
+	int version;
 	String schoolName;
 	String timezone;
 	String startDate;
 	String stopDate;
-	ArrayList<Period> periods;
-	ArrayList<RotationalDay> days;
-	ArrayList<Section> sections;
 	ArrayList<ClassMeeting> meetings;
 	ArrayList<Holiday> holidays;
+	ArrayList<RotationalDay> days;
 	
 	public Schedule() {
-		periods = new ArrayList<Period>();
-		days = new ArrayList<RotationalDay>();
-		sections = new ArrayList<Section>();
 		meetings = new ArrayList<ClassMeeting>();
 		holidays = new ArrayList<Holiday>();
+		days = new ArrayList<RotationalDay>();
 	}
 
 	public long getUserID() {
@@ -85,48 +87,6 @@ public class Schedule {
 		this.stopDate = stopDate;
 	}
 
-	public ArrayList<Period> getPeriods() {
-		return periods;
-	}
-
-	public void setPeriods(ArrayList<Period> periods) {
-		this.periods = periods;
-	}
-	
-	public void addPeriod(Period period) {
-		if( this.periods == null )
-			this.periods = new ArrayList<Period>();
-		this.periods.add(period);
-	}
-
-	public ArrayList<RotationalDay> getDays() {
-		return days;
-	}
-
-	public void setDays(ArrayList<RotationalDay> days) {
-		this.days = days;
-	}
-	
-	public void addDay(RotationalDay day) {
-		if( this.days == null )
-			this.days = new ArrayList<RotationalDay>();
-		this.days.add(day);
-	}
-
-	public ArrayList<Section> getSection() {
-		return sections;
-	}
-
-	public void setSection(ArrayList<Section> classes) {
-		this.sections = classes;
-	}
-	
-	public void addSection(Section c) {
-		if( this.sections == null )
-			this.sections = new ArrayList<Section>();
-		this.sections.add(c);
-	}
-
 	public ArrayList<ClassMeeting> getMeetings() {
 		return meetings;
 	}
@@ -155,6 +115,20 @@ public class Schedule {
 		this.holidays.add(holiday);
 	}
 	
+	public void addDay(RotationalDay day) {
+		if( this.days == null )
+			this.days = new ArrayList<RotationalDay>();
+		this.days.add(day);
+	}
+	
+	public ArrayList<RotationalDay> getDays() {
+		return days;
+	}
+
+	public void setDays(ArrayList<RotationalDay> days) {
+		this.days = days;
+	}
+
 	public static Schedule getScheduleFromDatabase(CallableStatement cs) throws SQLException, UnsupportedOperationException {
 		Schedule schedule = new Schedule();
 
@@ -169,60 +143,8 @@ public class Schedule {
 		schedule.setTimezone(rs.getString("TimeZone"));
 		schedule.setStartDate(rs.getString("StartDate"));
 		schedule.setStopDate(rs.getString("StopDate"));
+		schedule.setVersion(Constants.VERSION);
 		rs.close();
-		
-		if( !cs.getMoreResults() ) 
-			throw new UnsupportedOperationException("No rotational days found");
-		
-		// get Rotational Days
-		rs = cs.getResultSet();
-		while( rs.next() ) {
-			schedule.addDay(
-					new RotationalDay(
-							rs.getLong("PK_DayID"), 
-							rs.getString("Name")));
-		}		
-
-		if( !cs.getMoreResults() ) 
-			throw new UnsupportedOperationException("No periods found");
-		
-		// get Periods
-		rs = cs.getResultSet();
-		while( rs.next() ) {
-			Period p = new Period();
-			
-			p.setId(rs.getInt("PK_PeriodID"));
-			p.setNumber(rs.getInt("Number"));
-			p.setStartTime(rs.getString("Start"));
-			p.setStopTime(rs.getString("Stop"));
-			
-			schedule.addPeriod(p);
-		}		
-
-		if( !cs.getMoreResults() ) 
-			throw new UnsupportedOperationException("No sections found");
-		
-		// get Sections
-		rs = cs.getResultSet();
-		while( rs.next() ) {
-			Section s = new Section();
-			
-			s.setId(rs.getLong("PK_SectionID"));
-			s.setSubject(rs.getString("Subject"));
-			s.setSection(rs.getString("Section"));
-			s.setRoom(rs.getString("Room"));
-			s.setGrade(rs.getInt("Grade"));
-			String first = rs.getString("FirstName");
-			if( !TextUtils.isEmpty(first) ) {
-				s.setTeacherName(
-						first
-						+ " " +
-						rs.getString("LastName"));
-			}
-			s.setTeacherEmail(rs.getString("Email"));
-			
-			schedule.addSection(s);
-		}
 		
 		if( !cs.getMoreResults() )
 			throw new UnsupportedOperationException("No class meetings found");
@@ -231,27 +153,75 @@ public class Schedule {
 		rs = cs.getResultSet();
 		while( rs.next() ) {
 			ClassMeeting cm = new ClassMeeting();
-			
-			cm.setDayID(rs.getLong("FK_DayID"));
-			cm.setPeriodID(rs.getLong("FK_PeriodID"));
-			cm.setSectionID(rs.getLong("FK_SectionID"));
+
+			cm.setPeriod(rs.getInt("Period"));
+			cm.setSubject(rs.getString("Subject"));
+			cm.setGrade(rs.getInt("Grade"));
+			cm.setRoom(rs.getString("Room"));
+			String name = rs.getString("FirstName");
+			if( !TextUtils.isEmpty(name) ) {
+				cm.setTeacherName(
+						name + " " +
+						rs.getString("LastName"));
+			}
+			cm.setTeacherEmail(rs.getString("Email"));
+			cm.setStartTime(rs.getString("Start"));
+			cm.setStopTime(rs.getString("Stop"));
+			cm.setDay(rs.getInt("Day"));
+			cm.setDayName(rs.getString("Name"));
 			
 			schedule.addMeeting(cm);
 		}
+		rs.close();
 		
+		if( !cs.getMoreResults() )
+			throw new UnsupportedOperationException("No days found");
+		
+		
+		// get Rotational Days
+		rs = cs.getResultSet();
+		while( rs.next() ) {
+			RotationalDay rd = new RotationalDay();
+
+			rd.setName(rs.getString("Name"));
+			rd.setNumber(rs.getInt("Number"));
+			
+			schedule.addDay(rd);
+		}
+		rs.close();
+		
+		// Get Holidays
 		if( cs.getMoreResults() ) {
 			rs = cs.getResultSet();
+			DateTimeFormatter dtf = DateTimeFormat.forPattern("2015-MM-dd");
 			while( rs.next() ) {
-				Holiday h = new Holiday();
-				
-				h.setName(rs.getString("Name"));
-				h.setStartDate(rs.getString("StartDate"));
-				h.setStopDate(rs.getString("StopDate"));
-				
-				schedule.addHoliday(h);
+				String name = rs.getString("Name");
+				DateTime start = dtf.parseDateTime(rs.getString("StartDate"));
+				DateTime stop = dtf.parseDateTime(rs.getString("StopDate"));
+				while( !start.isAfter(stop) ){
+					Holiday h = new Holiday();
+					
+					h.setName(name);
+					h.setDate(dtf.print(start));
+					
+					schedule.addHoliday(h);
+					
+					start = start.plusDays(1);
+				}
 			}
 		}
+		rs.close();
 		
 		return schedule;
 	}
+
+	public int getVersion() {
+		return version;
+	}
+
+	public void setVersion(int version) {
+		this.version = version;
+	}
+	
+	
 }

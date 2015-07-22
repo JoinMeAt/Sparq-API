@@ -19,7 +19,7 @@ import com.sparqcalendar.Schedule;
 import com.sparqcalendar.util.DBConnection;
 import com.sparqcalendar.util.JsonTransformer;
 
-@Path("/schedules")
+@Path("/schedule")
 public class ScheduleSvc {
 	
 	@Path("/{userID}")
@@ -36,7 +36,7 @@ public class ScheduleSvc {
 		try {
 			con = DBConnection.getDBConnection();
 			
-			CallableStatement cs = con.prepareCall("{call GetSchedule(?,?,?,?)}");
+			CallableStatement cs = con.prepareCall("{call GetFullSchedule(?,?,?,?)}");
 			stmt = cs;
 			cs.setString("UserID", userID);
 			if( TextUtils.isEmpty(date) )
