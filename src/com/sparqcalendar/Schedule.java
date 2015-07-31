@@ -169,6 +169,8 @@ public class Schedule {
 			cm.setStopTime(rs.getString("Stop"));
 			cm.setDay(rs.getInt("Day"));
 			cm.setDayName(rs.getString("Name"));
+			cm.setSection(rs.getInt("Section"));
+			cm.setIcon(rs.getString("Icon"));
 			
 			schedule.addMeeting(cm);
 		}

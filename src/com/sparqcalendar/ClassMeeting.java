@@ -10,7 +10,9 @@ public class ClassMeeting {
 	String stopTime;
 	int period;
 	int day;
+	int section;
 	String dayName;
+	String icon;
 	
 	public ClassMeeting() {}
 
@@ -94,4 +96,19 @@ public class ClassMeeting {
 		this.dayName = dayName;
 	}
 	
+	public String getIcon() {
+		return icon;
+	}
+	
+	public void setIcon(String icon) {
+		this.icon = icon;
+	}
+	
+	public int getSection() {
+		return section;
+	}
+	
+	public void setSection(int section) {
+		this.section = section;
+	}
 }
