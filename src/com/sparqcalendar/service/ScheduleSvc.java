@@ -16,6 +16,7 @@ import javax.ws.rs.Produces;
 import org.apache.http.util.TextUtils;
 
 import com.sparqcalendar.Schedule;
+import com.sparqcalendar.util.Constants;
 import com.sparqcalendar.util.DBConnection;
 import com.sparqcalendar.util.JsonTransformer;
 
@@ -59,6 +60,23 @@ public class ScheduleSvc {
 		} finally {
 			DBConnection.closeConnection(con);
 			DBConnection.closeStatement(stmt);
+		}
+		
+		
+		return response;
+	}
+	
+	@GET
+	@Path("/version/{version}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String checkVersion(
+			@PathParam("version") String version ) {
+		String response = "{\"version\":\"%s\"}";
+		
+		if( Integer.parseInt(version) == Constants.VERSION ) {
+			response = String.format(response,"current");
+		} else {
+			response = String.format(response,"old");
 		}
 		
 		

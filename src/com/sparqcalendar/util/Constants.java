@@ -1,7 +1,7 @@
 package com.sparqcalendar.util;
 
 public class Constants {
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 	
 	// Database Connection
 	public static final String DATABASE = "jdbc:mysql://dev-a.baconlove.club:3306/Sparq";
