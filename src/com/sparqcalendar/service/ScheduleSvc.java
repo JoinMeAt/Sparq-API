@@ -16,6 +16,7 @@ import javax.ws.rs.Produces;
 import org.apache.http.util.TextUtils;
 
 import com.sparqcalendar.Schedule;
+import com.sparqcalendar.SparqError;
 import com.sparqcalendar.util.Constants;
 import com.sparqcalendar.util.DBConnection;
 import com.sparqcalendar.util.JsonTransformer;
@@ -53,10 +54,8 @@ public class ScheduleSvc {
 				response = JsonTransformer.toJson(schedule);
 			}					
 			
-		} catch (SQLException e) {
-			e.printStackTrace();
 		} catch (Exception e) {
-			e.printStackTrace();
+			response = JsonTransformer.toJson(new SparqError(e.getMessage()));
 		} finally {
 			DBConnection.closeConnection(con);
 			DBConnection.closeStatement(stmt);
