@@ -2,6 +2,8 @@ package com.sparqcalendar.service;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -20,6 +22,7 @@ import com.sparqcalendar.SparqError;
 import com.sparqcalendar.util.Constants;
 import com.sparqcalendar.util.DBConnection;
 import com.sparqcalendar.util.JsonTransformer;
+import com.sun.org.apache.bcel.internal.generic.DCONST;
 
 @Path("/schedule")
 public class ScheduleSvc {
@@ -69,13 +72,43 @@ public class ScheduleSvc {
 	@Path("/version/{version}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String checkVersion(
-			@PathParam("version") String version ) {
+			@PathParam("version") String versionStr,
+			@QueryParam("scheduleID") String scheduleID) {
 		String response = "{\"version\":\"%s\"}";
+		Connection con = null;
+		PreparedStatement ps = null;
 		
-		if( Integer.parseInt(version) == Constants.VERSION ) {
-			response = String.format(response,"current");
+		long version = Long.parseLong(versionStr);
+		if( TextUtils.isEmpty(scheduleID) ) { 
+			if(  version == Constants.VERSION ) {
+				response = String.format(response,"current");
+			} else {
+				response = String.format(response,"old");
+			}
 		} else {
-			response = String.format(response,"old");
+			try {
+				con = DBConnection.getDBConnection();
+				ps = con.prepareStatement("SELECT Version FROM Schedules "
+																					+ " WHERE PK_ScheduleID = ?"
+																					+ " LIMIT 1");
+				ps.setLong(1,Long.parseLong(scheduleID));
+				
+				ResultSet rs = ps.executeQuery();
+				
+				while(rs.next()) {
+					int versionID = rs.getInt("Version");
+					if( versionID == version ) {
+						response = String.format(response,"current");
+					} else {
+						response = String.format(response,"old");
+					}
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				DBConnection.closeStatement(ps);
+				DBConnection.closeConnection(con);
+			}
 		}
 		
 		

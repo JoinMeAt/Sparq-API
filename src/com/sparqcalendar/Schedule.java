@@ -14,6 +14,8 @@ import com.sparqcalendar.util.Constants;
 
 public class Schedule {
 	long userID;
+	long scheduleID;
+	long schoolID;
 	int type;
 	int grade;
 	int version;
@@ -129,6 +131,22 @@ public class Schedule {
 		this.days = days;
 	}
 
+	public long getScheduleID() {
+		return scheduleID;
+	}
+
+	public void setScheduleID(long scheduleID) {
+		this.scheduleID = scheduleID;
+	}
+
+	public long getSchoolID() {
+		return schoolID;
+	}
+
+	public void setSchoolID(long schoolID) {
+		this.schoolID = schoolID;
+	}
+
 	public static Schedule getScheduleFromDatabase(CallableStatement cs) throws SQLException, UnsupportedOperationException {
 		Schedule schedule = new Schedule();
 
@@ -137,13 +155,15 @@ public class Schedule {
 		// get Schedule data
 		rs.next();
 		schedule.setUserID(rs.getLong("PK_UserID"));
+		schedule.setScheduleID(rs.getLong("ScheduleID"));
+		schedule.setSchoolID(rs.getLong("SchoolID"));
 		schedule.setType(rs.getInt("Type"));
 		schedule.setGrade(rs.getInt("Grade"));
 		schedule.setSchoolName(rs.getString("Name"));
 		schedule.setTimezone(rs.getString("TimeZone"));
 		schedule.setStartDate(rs.getString("StartDate"));
 		schedule.setStopDate(rs.getString("StopDate"));
-		schedule.setVersion(Constants.VERSION);
+		schedule.setVersion(rs.getInt("Version"));
 		rs.close();
 		
 		if( !cs.getMoreResults() )
