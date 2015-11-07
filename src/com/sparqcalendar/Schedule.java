@@ -178,12 +178,7 @@ public class Schedule {
 			cm.setSubject(rs.getString("Subject"));
 			cm.setGrade(rs.getInt("Grade"));
 			cm.setRoom(rs.getString("Room"));
-			String name = rs.getString("FirstName");
-			if( !TextUtils.isEmpty(name) ) {
-				cm.setTeacherName(
-						name + " " +
-						rs.getString("LastName"));
-			}
+			cm.setTeacherName(rs.getString("LastName"));
 			cm.setTeacherEmail(rs.getString("Email"));
 			cm.setStartTime(rs.getString("Start"));
 			cm.setStopTime(rs.getString("Stop"));
