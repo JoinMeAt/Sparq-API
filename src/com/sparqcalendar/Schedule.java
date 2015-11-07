@@ -14,7 +14,7 @@ import com.sparqcalendar.util.Constants;
 
 public class Schedule {
 	long userID;
-	long scheduleID;
+	long schoolYearD;
 	long schoolID;
 	int type;
 	int grade;
@@ -23,12 +23,18 @@ public class Schedule {
 	String timezone;
 	String startDate;
 	String stopDate;
+	ArrayList<Semester> semesters;
+	ArrayList<Section> sections;
 	ArrayList<ClassMeeting> meetings;
+	ArrayList<Period> periods;
 	ArrayList<Holiday> holidays;
 	ArrayList<RotationalDay> days;
 	
 	public Schedule() {
+		semesters = new ArrayList<Semester>();
+		sections = new ArrayList<Section>();
 		meetings = new ArrayList<ClassMeeting>();
+		periods = new ArrayList<Period>();
 		holidays = new ArrayList<Holiday>();
 		days = new ArrayList<RotationalDay>();
 	}
@@ -131,12 +137,12 @@ public class Schedule {
 		this.days = days;
 	}
 
-	public long getScheduleID() {
-		return scheduleID;
+	public long getSchoolYearID() {
+		return schoolYearD;
 	}
 
-	public void setScheduleID(long scheduleID) {
-		this.scheduleID = scheduleID;
+	public void setSchoolYearID(long schoolYearD) {
+		this.schoolYearD = schoolYearD;
 	}
 
 	public long getSchoolID() {
@@ -145,6 +151,18 @@ public class Schedule {
 
 	public void setSchoolID(long schoolID) {
 		this.schoolID = schoolID;
+	}
+	
+	public void addSemester(Semester s) {
+		semesters.add(s);
+	}
+	
+	public void addPeriod(Period p) {
+		periods.add(p);
+	}
+	
+	public void addSection(Section s) {
+		sections.add(s);
 	}
 
 	public static Schedule getScheduleFromDatabase(CallableStatement cs) throws SQLException, UnsupportedOperationException {
@@ -155,7 +173,7 @@ public class Schedule {
 		// get Schedule data
 		rs.next();
 		schedule.setUserID(rs.getLong("PK_UserID"));
-		schedule.setScheduleID(rs.getLong("ScheduleID"));
+		schedule.setSchoolYearID(rs.getLong("SchoolYearID"));
 		schedule.setSchoolID(rs.getLong("SchoolID"));
 		schedule.setType(rs.getInt("Type"));
 		schedule.setGrade(rs.getInt("Grade"));
@@ -167,42 +185,75 @@ public class Schedule {
 		rs.close();
 		
 		if( !cs.getMoreResults() )
+			throw new UnsupportedOperationException("No semesters found");
+		
+		rs = cs.getResultSet();
+		while(rs.next()) {
+			Semester s = new Semester();
+			s.id = rs.getLong("PK_SemesterID");
+			s.startDate = rs.getString("StartDate");
+			s.stopDate = rs.getString("StopDate");
+			schedule.addSemester(s);
+		}
+		rs.close();
+		
+		if( !cs.getMoreResults() )
+			throw new UnsupportedOperationException("No sections found");
+		
+		rs = cs.getResultSet();
+		while(rs.next()) {
+			Section s = new Section();
+			s.id = rs.getLong("PK_SectionID");
+			s.subject = rs.getString("Subject");
+			s.grade = rs.getInt("Grade");
+			s.room = rs.getString("Room");
+			s.teacherName = rs.getString("LastName");
+			s.teacherEmail = rs.getString("Email");
+			s.section = rs.getInt("Section");
+			s.icon = rs.getString("Icon");
+			schedule.addSection(s);
+		}
+		rs.close();
+		
+		if( !cs.getMoreResults() )
 			throw new UnsupportedOperationException("No class meetings found");
 		
 		// get Class Meetings
 		rs = cs.getResultSet();
 		while( rs.next() ) {
 			ClassMeeting cm = new ClassMeeting();
-
-			cm.setPeriod(rs.getInt("Period"));
-			cm.setSubject(rs.getString("Subject"));
-			cm.setGrade(rs.getInt("Grade"));
-			cm.setRoom(rs.getString("Room"));
-			cm.setTeacherName(rs.getString("LastName"));
-			cm.setTeacherEmail(rs.getString("Email"));
-			cm.setStartTime(rs.getString("Start"));
-			cm.setStopTime(rs.getString("Stop"));
-			cm.setDay(rs.getInt("Day"));
-			cm.setDayName(rs.getString("Name"));
-			cm.setSection(rs.getInt("Section"));
-			cm.setIcon(rs.getString("Icon"));
-			
+			cm.sectionID = rs.getLong("FK_SectionID");
+			cm.periodID = rs.getLong("FK_PeriodID");
+			cm.dayID = rs.getLong("FK_DayID");
+			cm.semesterID = rs.getLong("FK_SemesterID");
 			schedule.addMeeting(cm);
+		}
+		rs.close();
+		
+		if( !cs.getMoreResults() )
+			throw new UnsupportedOperationException("No periods found");
+		
+		rs = cs.getResultSet();
+		while( rs.next() ) {
+			Period p = new Period();
+			p.id = rs.getLong("PK_PeriodID");
+			p.number = rs.getInt("Number");
+			p.start = rs.getString("Start");
+			p.stop = rs.getString("Stop");
+			schedule.addPeriod(p);
 		}
 		rs.close();
 		
 		if( !cs.getMoreResults() )
 			throw new UnsupportedOperationException("No days found");
 		
-		
 		// get Rotational Days
 		rs = cs.getResultSet();
 		while( rs.next() ) {
 			RotationalDay rd = new RotationalDay();
-
-			rd.setName(rs.getString("Name"));
-			rd.setNumber(rs.getInt("Number"));
-			
+			rd.id = rs.getLong("PK_DayID");
+			rd.name = rs.getString("Name");
+			rd.number = rs.getInt("Number");			
 			schedule.addDay(rd);
 		}
 		rs.close();
@@ -210,7 +261,7 @@ public class Schedule {
 		// Get Holidays
 		if( cs.getMoreResults() ) {
 			rs = cs.getResultSet();
-			DateTimeFormatter dtf = DateTimeFormat.forPattern("2015-MM-dd");
+			DateTimeFormatter dtf = DateTimeFormat.forPattern("YYYY-MM-dd");
 			while( rs.next() ) {
 				String name = rs.getString("Name");
 				DateTime start = dtf.parseDateTime(rs.getString("StartDate"));

@@ -41,7 +41,7 @@ public class ScheduleSvc {
 		try {
 			con = DBConnection.getDBConnection();
 			
-			CallableStatement cs = con.prepareCall("{call GetFullSchedule(?,?,?,?)}");
+			CallableStatement cs = con.prepareCall("{call GetCondensedFullSchedule(?,?,?,?)}");
 			stmt = cs;
 			cs.setString("UserID", userID);
 			if( TextUtils.isEmpty(date) )

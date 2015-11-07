@@ -1,8 +1,9 @@
 package com.sparqcalendar;
 
 public class RotationalDay {
-	int number;
-	String name;
+	public long id;
+	public int number;
+	public String name;
 	
 	public RotationalDay() {}
 	
