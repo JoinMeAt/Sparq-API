@@ -73,13 +73,13 @@ public class ScheduleSvc {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String checkVersion(
 			@PathParam("version") String versionStr,
-			@QueryParam("scheduleID") String scheduleID) {
+			@QueryParam("schoolYearID") String schoolYearID) {
 		String response = "{\"version\":\"%s\"}";
 		Connection con = null;
 		PreparedStatement ps = null;
 		
 		long version = Long.parseLong(versionStr);
-		if( TextUtils.isEmpty(scheduleID) ) { 
+		if( TextUtils.isEmpty(schoolYearID) ) { 
 			if(  version == Constants.VERSION ) {
 				response = String.format(response,"current");
 			} else {
@@ -88,10 +88,10 @@ public class ScheduleSvc {
 		} else {
 			try {
 				con = DBConnection.getDBConnection();
-				ps = con.prepareStatement("SELECT Version FROM Schedules "
-																					+ " WHERE PK_ScheduleID = ?"
+				ps = con.prepareStatement("SELECT Version FROM SchoolYears "
+																					+ " WHERE PK_SchoolYearID = ?"
 																					+ " LIMIT 1");
-				ps.setLong(1,Long.parseLong(scheduleID));
+				ps.setLong(1,Long.parseLong(schoolYearID));
 				
 				ResultSet rs = ps.executeQuery();
 				

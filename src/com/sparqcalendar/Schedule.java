@@ -14,7 +14,7 @@ import com.sparqcalendar.util.Constants;
 
 public class Schedule {
 	long userID;
-	long schoolYearD;
+	long schoolYearID;
 	long schoolID;
 	int type;
 	int grade;
@@ -138,11 +138,11 @@ public class Schedule {
 	}
 
 	public long getSchoolYearID() {
-		return schoolYearD;
+		return schoolYearID;
 	}
 
 	public void setSchoolYearID(long schoolYearD) {
-		this.schoolYearD = schoolYearD;
+		this.schoolYearID = schoolYearD;
 	}
 
 	public long getSchoolID() {
