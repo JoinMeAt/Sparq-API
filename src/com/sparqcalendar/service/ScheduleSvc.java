@@ -54,7 +54,7 @@ public class ScheduleSvc {
 			if( cs.execute() ) {
 				schedule = Schedule.getScheduleFromDatabase(cs);
 				
-				response = JsonTransformer.toJson(schedule);
+				response = JsonTransformer.toJson(schedule).replaceAll("'", "\\\\'"); // unicode for \' 
 			}					
 			
 		} catch (Exception e) {
@@ -63,7 +63,6 @@ public class ScheduleSvc {
 			DBConnection.closeConnection(con);
 			DBConnection.closeStatement(stmt);
 		}
-		
 		
 		return response;
 	}

@@ -40,7 +40,7 @@ public class UserSvc {
 		try {			
 			con = DBConnection.getDBConnection();
 
-			stmt = con.prepareCall("{call VerifyPassword(?,?,?,?,?)}");
+			stmt = con.prepareCall("{call VerifyPasswordCondensed(?,?,?,?,?)}");
 			CallableStatement cs = (CallableStatement) stmt;
 			cs.setString("Email", email);
 			cs.setString("Password", password);
@@ -51,7 +51,7 @@ public class UserSvc {
 			if( cs.execute() ) {
 				schedule = Schedule.getScheduleFromDatabase(cs);
 				
-				response = JsonTransformer.toJson(schedule);
+				response = JsonTransformer.toJson(schedule).replaceAll("'", "\\\\'"); // unicode for \' 
 			} else {
 				if( cs.getBoolean("Success") ) {
 					return "false";
