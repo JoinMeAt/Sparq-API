@@ -210,7 +210,7 @@ public class Schedule {
 		// Get Holidays
 		if( cs.getMoreResults() ) {
 			rs = cs.getResultSet();
-			DateTimeFormatter dtf = DateTimeFormat.forPattern("2015-MM-dd");
+			DateTimeFormatter dtf = DateTimeFormat.forPattern("YYYY-MM-dd");
 			while( rs.next() ) {
 				String name = rs.getString("Name");
 				DateTime start = dtf.parseDateTime(rs.getString("StartDate"));
