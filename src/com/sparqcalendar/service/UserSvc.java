@@ -2,6 +2,7 @@ package com.sparqcalendar.service;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -10,6 +11,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.Produces;
@@ -199,4 +201,33 @@ public class UserSvc {
 		return response;
 	}
 
+	
+	@GET
+	@Path("/open/{userID}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String appOpen(
+			@PathParam("userID") long userID
+			) {
+		String response = null;
+		Connection con = null;
+		PreparedStatement stmt = null;
+		
+		try {
+			con = DBConnection.getDBConnection();
+			
+			stmt = con.prepareStatement("INSERT INTO AppOpens VALUES(?,NOW())");
+			stmt.setLong(1,userID);
+			stmt.executeUpdate();
+			
+			con.commit();
+			response = "true";
+		} catch (Exception e) {
+			response = JsonTransformer.toJson(new SparqError(e.getMessage()));
+		} finally {
+			DBConnection.closeStatement(stmt);
+			DBConnection.closeConnection(con);
+		}
+		
+		return response;
+	}
 }
