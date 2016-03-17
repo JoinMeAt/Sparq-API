@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import org.apache.http.util.TextUtils;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -216,12 +217,14 @@ public class Schedule {
 				DateTime start = dtf.parseDateTime(rs.getString("StartDate"));
 				DateTime stop = dtf.parseDateTime(rs.getString("StopDate"));
 				while( !start.isAfter(stop) ){
-					Holiday h = new Holiday();
-					
-					h.setName(name);
-					h.setDate(dtf.print(start));
-					
-					schedule.addHoliday(h);
+					if( start.dayOfWeek().get() < DateTimeConstants.SATURDAY ) {
+						Holiday h = new Holiday();
+						
+						h.setName(name);
+						h.setDate(dtf.print(start));
+						
+						schedule.addHoliday(h);
+					}
 					
 					start = start.plusDays(1);
 				}
